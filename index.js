@@ -23,8 +23,8 @@ var fs = require('fs'),
         options: null,
 
         // TODO figure out how to actually use templates for this?
-        moduleIntro: path.resolve(__dirname, './tmpls/intro.tmpl.js'),
-        moduleOutro: path.resolve(__dirname, './tmpls/outro.tmpl.js')
+//        moduleIntro: path.resolve(__dirname, './tmpls/intro.tmpl.js'),
+//        moduleOutro: path.resolve(__dirname, './tmpls/outro.tmpl.js')
 
     },
     options,
