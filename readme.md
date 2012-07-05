@@ -1,4 +1,4 @@
-# requierer version 0.0.0
+# requirer version 0.0.0
 
 Write node style requires (and eventually optionally inline code via 
 annotations and rewrite source to ES3) and build single files for the browser.
