@@ -40,15 +40,20 @@ module.exports = function (conf) {
 }
 
 function init () {
+    var name;
     // if this is the top level module and no args were provided, treat it
     // like a cry for help
     !module.parent && config.args.length == 2 && config.args.push('-h');
     options = config.options || argparse(config.argSchema)(config.args);
 
-    // root of tree
-    mainModule = new Mod('index');
+    name = options.index.split('/').pop();
+    if (name.indexOf('.js') + 3 == name.length)
+        name = name.slice(0, -3);
 
-    mainModule.load(path.resolve(__dirname, options.index));
+    // root of tree
+    mainModule = new Mod(name);
+
+    mainModule.load(path.resolve(__dirname, options.index), name);
     output = mainModule.build();
 
 
