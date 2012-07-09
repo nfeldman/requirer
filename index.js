@@ -56,6 +56,7 @@ function init () {
 
     mainModule.load(path.resolve(__dirname, options.index), name);
     output = mainModule.build();
+
 options.v && each(mainModule._mods, function (val, key) {
         console.log(key);
         each(val, function (val, key) {
