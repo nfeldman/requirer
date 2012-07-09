@@ -11,6 +11,7 @@ var fs = require('fs'),
     config = {
         argSchema: {
             index: ['path to first file input','required'],
+            verbose:['v', true, 'spew details'],
             saveAs: ['path to final output file','required'],
             format: ['f', 'final module format, e.g. amd or amd-cjs-global. ' +
                           'If a global is created, its name will match the output ' +
@@ -55,7 +56,12 @@ function init () {
 
     mainModule.load(path.resolve(__dirname, options.index), name);
     output = mainModule.build();
-
+options.v && each(mainModule._mods, function (val, key) {
+        console.log(key);
+        each(val, function (val, key) {
+            console.log('  - ', key)
+        })
+    })
 
     if (options.es3) {
         // do something to the ast
