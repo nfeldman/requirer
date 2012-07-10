@@ -59,8 +59,8 @@ function init () {
 
 options.v && each(mainModule._mods, function (val, key) {
         console.log(key);
-        each(val, function (val, key) {
-            console.log('  - ', key)
+        each(val, function (val1, key1) {
+            console.log('  - ', key1, ' depends on ', val1._requires)
         })
     })
 
@@ -72,9 +72,9 @@ options.v && each(mainModule._mods, function (val, key) {
 var left = '(function (global, undef) {\n',
     right = '\n}(this));';
 
-    if (options.saveAs) {
-        fs.writeFileSync(options.saveAs, left + output.src + right, 'utf8');
-    }
+    // if (options.saveAs) {
+    //     fs.writeFileSync(options.saveAs, output.src, 'utf8');
+    // }
 
 }
 
