@@ -55,15 +55,8 @@ function init () {
     mainModule = new Mod(name);
 
     mainModule.load(path.resolve(__dirname, options.index), name);
-    // mainModule.sortDependencies();
     output = mainModule.build();
 
-options.v && each(mainModule._mods, function (val, key) {
-        console.log(key);
-        each(val, function (val1, key1) {
-            console.log('  - ', key1, ' depends on ', val1._requires)
-        })
-    })
 
     if (options.es3) {
         // do something to the ast
