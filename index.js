@@ -55,6 +55,7 @@ function init () {
     mainModule = new Mod(name);
 
     mainModule.load(path.resolve(__dirname, options.index), name);
+    // mainModule.sortDependencies();
     output = mainModule.build();
 
 options.v && each(mainModule._mods, function (val, key) {
@@ -68,13 +69,9 @@ options.v && each(mainModule._mods, function (val, key) {
         // do something to the ast
     }
 
-// TEMPORARY HACK
-var left = '(function (global, undef) {\n',
-    right = '\n}(this));';
-
-    // if (options.saveAs) {
-    //     fs.writeFileSync(options.saveAs, output.src, 'utf8');
-    // }
+    if (options.saveAs) {
+        fs.writeFileSync(options.saveAs, output.src, 'utf8');
+    }
 
 }
 
