@@ -77,8 +77,8 @@ function init () {
     // 
     if (options.watch) {
         rootdir = path.resolve(__dirname, options.index);
-        watch.createMonitor(rootdir.slice(0, rootdir.lastIndexOf('/')), function (monitor) {
-            monitor.files = mainModule.sorted;
+        watch.createMonitor(rootdir.slice(0, rootdir.lastIndexOf('/')), {ignoreDotFiles:true}, function (monitor) {
+            // monitor.files = mainModule.sorted;
             monitor.on("changed", function (f, curr, prev) {
               updateBuild();
             });
