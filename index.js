@@ -1,23 +1,25 @@
 var fs = require('fs'),  
-    util = require('util'),
+    // util = require('util'),
     path = require('path'),
 
     Mod = require('./lib/Mod'),
     each = Mod.each,
     argparse = require('./lib/argparse'),
-    
+
+    watch = require('watch'),
 
     // set defaults to use when this module is executed from the cli
     config = {
         argSchema: {
             index: ['path to first file input','required'],
+            dev: ['d', 'build a file full of document.writeLn\'s for local dev \033[31mNOT IMPLEMENTED\033[39m'],
             verbose:['v', true, 'spew details'],
             saveAs: ['path to final output file','required'],
             format: ['f', 'final module format, e.g. amd or amd-cjs-global. ' +
                           'If a global is created, its name will match the output ' +
                           "file's name \033[31mNOT IMPLEMENTED\033[39m"],
             es3: ['3', true, 'convert es5 to es3, see docs for supported conversions \033[31mNOT IMPLEMENTED\033[39m'],
-            watch: ['w', true, 'whether to watch module files for changes \033[31mNOT IMPLEMENTED\033[39m']
+            watch: ['w', true, 'whether to watch module files for changes']
         },
         // defaults
         args: process.argv,
@@ -62,8 +64,35 @@ function init () {
         // do something to the ast
     }
 
+    function updateBuild () {
+        console.time('saving build:')
+        fs.writeFileSync(options.saveAs, mainModule.build().src, 'utf8');
+        console.timeEnd('saving build:');
+    }
+
+    // TODO it shouldn't be necessary to re-process everything
+    // let's try for something a little less brute force, at some point?
+    // WARNING: I just threw in file watching via a module, I don't yet know 
+    // if using it the way I am here is entirely safe.
+    // 
+    if (options.watch) {
+        var rootdir = path.resolve(__dirname, options.index);
+        watch.createMonitor(rootdir.slice(0, rootdir.lastIndexOf('/')), function (monitor) {
+            monitor.files = mainModule.sorted;
+            monitor.on("changed", function (f, curr, prev) {
+              updateBuild();
+            });
+            monitor.on("removed", function (f, stat) {
+              updateBuild();
+            });
+        })
+
+
+    }
+
     if (options.saveAs) {
         fs.writeFileSync(options.saveAs, output.src, 'utf8');
+
     }
 
 }
