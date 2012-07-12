@@ -64,8 +64,8 @@ function init () {
     }
 
     function updateBuild () {
-        output = mainModule.build();
         console.time('saving build');
+        output = mainModule.build();
         fs.writeFileSync(options.saveAs, output.src, 'utf8');
         console.timeEnd('saving build');
     }
