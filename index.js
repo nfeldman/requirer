@@ -34,6 +34,9 @@ var fs = require('fs'),
     rootdir;
 
 
+// TODO grok the finer points of the LLJS project, I think it has much for
+// me to learn. https://github.com/mbebenita/LLJS/blob/master/src/compiler.js
+
 // export a module to allow calling this from within another script
 // the conf object, if provided, will override defaults
 module.exports = function (conf) {
