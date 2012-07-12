@@ -7,7 +7,6 @@ var fs = require('fs'),
     argparse = require('./lib/argparse'),
 
     watch = require('watch'),
-
     // set defaults to use when this module is executed from the cli
     config = {
         argSchema: {
@@ -31,7 +30,8 @@ var fs = require('fs'),
 
     },
     options,
-    output;
+    output,
+    rootdir;
 
 
 // export a module to allow calling this from within another script
@@ -57,7 +57,6 @@ function init () {
     mainModule = new Mod(name);
 
     mainModule.load(path.resolve(__dirname, options.index), name);
-    output = mainModule.build();
 
 
     if (options.es3) {
@@ -65,9 +64,10 @@ function init () {
     }
 
     function updateBuild () {
-        console.time('saving build:')
-        fs.writeFileSync(options.saveAs, mainModule.build().src, 'utf8');
-        console.timeEnd('saving build:');
+        output = mainModule.build();
+        console.time('saving build');
+        fs.writeFileSync(options.saveAs, output.src, 'utf8');
+        console.timeEnd('saving build');
     }
 
     // TODO it shouldn't be necessary to re-process everything
@@ -76,7 +76,7 @@ function init () {
     // if using it the way I am here is entirely safe.
     // 
     if (options.watch) {
-        var rootdir = path.resolve(__dirname, options.index);
+        rootdir = path.resolve(__dirname, options.index);
         watch.createMonitor(rootdir.slice(0, rootdir.lastIndexOf('/')), function (monitor) {
             monitor.files = mainModule.sorted;
             monitor.on("changed", function (f, curr, prev) {
@@ -91,7 +91,7 @@ function init () {
     }
 
     if (options.saveAs) {
-        fs.writeFileSync(options.saveAs, output.src, 'utf8');
+        updateBuild();
 
     }
 
