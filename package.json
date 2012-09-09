@@ -1,11 +1,11 @@
 {
   "author": "Noah Feldman <nfeldman@nsfdesign.com>",
   "name": "requirer",
-  "description": "(eventually)Write node style requires, optionally inline code with annotations, and generate browser optimized builds, including replacing some ES5 features with ES3 compatible code.",
+  "description": "(eventually) Write node style requires, optionally inline code with annotations, and generate browser optimized builds, including replacing some ES5 features with ES3 compatible code.",
   "version": "0.0.0",
   "main": "index.js",
   "dependencies": {
-    "esprima": "~0.9.9",
+    "esprima": ">=0.9.9",
     "escodegen":">=0.0.4",
     "watch": ">=0.5.1"
   },
