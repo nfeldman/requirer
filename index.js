@@ -13,6 +13,7 @@ var fs = require('fs'),
             index: ['path to first file input','required'],
             dev: ['d', 'build a file full of document.writeLn\'s for local dev \033[31mNOT IMPLEMENTED\033[39m'],
             verbose:['v', true, 'spew details'],
+            params: ['comma delimited string of additional formal parameters for the IIFE in which a module is defined'],
             saveAs: ['path to final output file','required'],
             format: ['f', 'final module format, e.g. amd or amd-cjs-global. ' +
                           'If a global is created, its name will match the output ' +
@@ -68,7 +69,7 @@ function init () {
 
     function updateBuild () {
         console.time('saving build');
-        output = mainModule.build();
+        output = options.params ? mainModule.build.apply(mainModule, options.params.split(',')) : mainModule.build();
         fs.writeFileSync(options.saveAs, output.src, 'utf8');
         console.timeEnd('saving build');
     }
