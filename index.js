@@ -1,5 +1,4 @@
-var fs = require('fs'),  
-    // util = require('util'),
+var fs = require('fs'),
     path = require('path'),
 
     Mod = require('./lib/Mod'),
@@ -23,7 +22,7 @@ var fs = require('fs'),
         },
         // defaults
         args: process.argv,
-        options: null,
+        options: null
 
         // TODO figure out how to actually use templates for this?
 //        moduleIntro: path.resolve(__dirname, './tmpls/intro.tmpl.js'),
@@ -47,7 +46,7 @@ module.exports = function (conf) {
 }
 
 function init () {
-    var name;
+    var name, mainModule;
     // if this is the top level module and no args were provided, treat it
     // like a cry for help
     !module.parent && config.args.length == 2 && config.args.push('-h');
