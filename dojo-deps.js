@@ -102,9 +102,9 @@ function init () {
                 return {
                     name: dep.name,
                     group: group || 'root',
-                    imports: dep.edges.sort(function (a, b) {return a.name > b.name ? -1 : 1})
+                    imports: dep.edges
                 };
-            }).sort(function (a, b) {return a.name > b.name ? -1 : 1})));
+            }).sort(function (a, b) {return a.name > b.name ? 1 : -1})));
           }());
           break;
         case 2:
