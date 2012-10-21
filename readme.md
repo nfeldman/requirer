@@ -2,3 +2,5 @@ dojo dependency mapper
 ======================
 
 This is a quick hack / distraction from the original requirer project because I wanted to visualize a large project built on dojo 1.5. Given an input js file, a json file mapping package paths to paths in the file system, e.g. {"dojo.":"/Users/noahfeldman/project/js/vendor", "mystuff.other":"/Users/noahfeldman/project/js"}, that the script is unable to infer otherwise. There are 5 types of output which all go to stdout, run ```node node-deps``` for info, or read the node-deps source. The fourth and fifth options will let you drop the output into a json file and feed it to many of of the examples on the d3js project's site.
+
+There's a second version, an even quicker hack, that will attempt to find all declared relationships between .js files. It recursively walks a directory, or set of directories, and indexes both dojo.provide and dojo.require. It is just a brute force scan of all the files, no optimizations or subtleties -- boring and easy, in other words -- all it does is build a big ball of json which we can later parse and manipulate into something we can visualize with d3.
