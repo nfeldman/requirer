@@ -11,11 +11,11 @@ var fs      = require('fs'),
 // is that it is hard to see how to make a useful EventEmitter.
 // But it should be fast enough that we won't care.
 
-
 function Mod () {
     this.source   = '';
     this.location = '';
     this.identity = '';
+    this.timesSeen = 0;
 }
 
 module.exports = function (path, relativeID, root) {
@@ -31,11 +31,9 @@ module.exports = function (path, relativeID, root) {
             isReady: false,
             modules: Object.create(null),
             getSorted: function () {
-                var deps   = this.deps,
-                    seen   = {},
+                var seen   = {},
                     sorted = [];
                 function visit (name) {
-                    var next;
                     if (seen[name])
                         return;
                     seen[name] = true;
@@ -73,7 +71,7 @@ module.exports = function (path, relativeID, root) {
             deps[parent.identity].push(resolvedID);
 
         if (modules.modules[resolvedID])
-            return;
+            return ++modules.modules[resolvedID].timesSeen;
 
         ++jobTotal;
         
@@ -81,6 +79,7 @@ module.exports = function (path, relativeID, root) {
         module = modules.modules[resolvedID];
         module.location = path;
         module.identity = resolvedID;
+        ++module.timesSeen;
 
         fs.readFile(path, 'utf8', function (err, data) {
             if (err) // TODO real error handling
