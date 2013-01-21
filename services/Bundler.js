@@ -33,7 +33,7 @@ Bundler.prototype.getModules = function (path, relativeID, root, addSourceURLCom
 
         if (addComment)
             for ( ; i < l; i++)
-                modules[ordered[i]] = this.modules[ordered[i]].source + '\n//@sourceURL=' + this.modules[ordered[i]].location;
+                modules[ordered[i]] = this.modules[ordered[i]].source + '\n//@ sourceURL=http://localhost:1337' + this.modules[ordered[i]].identity;
         else 
             for ( ; i < l; i++)
                 modules[ordered[i]] = this.modules[ordered[i]].source;

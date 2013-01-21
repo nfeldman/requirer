@@ -8,7 +8,7 @@ var fs      = require('fs'),
 
 // The downside to the object oriented approach in the previous
 // version was that it got weird. The downside to this version
-// is that it is hard to see how to make a useful EventEmitter.
+// is that it is hard to see how to make it work as an EventEmitter.
 // But it should be fast enough that we won't care.
 
 function Mod () {
@@ -53,7 +53,7 @@ module.exports = function (path, relativeID, root) {
     return modules;
 
     function load (path, relativeID, root, parent, isRoot) {
-        var resolvedID  = !path.indexOf(root) && path.slice(rootLen),
+        var resolvedID = !path.indexOf(root) && path.slice(rootLen, -3),
             module;
 
         if (!resolvedID) // TODO real error handling
@@ -63,8 +63,9 @@ module.exports = function (path, relativeID, root) {
 
         if (parent && parent.source) {
             // TODO use ranges from acorn + arrays to build one final string
-            // rather than the n replacements this will require
-            parent.source = parent.source.replace(RegExp(relativeID, 'g'), resolvedID);
+            // rather than the n replacements this will require. It may or may not
+            // be faster, but it will definitely be more robust.
+            parent.source = parent.source.replace(RegExp('\\(\\s*[\'"]' + relativeID + '[\'"]\\s*\\)', 'g'), "('" + resolvedID + "')");
         }
 
         if (parent && parent.identity)
