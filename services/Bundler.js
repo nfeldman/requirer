@@ -1,12 +1,36 @@
+/**
+ * A class that bundles modules prepared by sourceLoader into a JSON 
+ * object, optionally including the //@ sourceURL comment for better client 
+ * side debugging.
+ */
 var sourceLoader = require('./sourceLoader'),
     mix = require('../lib/mix'),
     onReady = require('../lib/onReady');
 
 // TODO identifier shortening
 // since all of the modules are in the same place, we can rewrite their names
-// TODO uglifyjs option
 
-function Bundler (path, relativeID, root, addSourceURLComment) {
+/**
+ *
+ * @param {Object} options
+ * @param {string} options.path Path to the root module
+ * @param {string} options.relativeID Directory relative id string, e.g. '../lib/mix'
+ * @param {string} options.root Portion of the system path to exclude from 
+ *                              module names, e.g. /Users/nfeldman/projects
+ * @param {boolean} [addSourceComment=false] Whether to include a comment that
+ *                                           causes chrome's debugger to display
+ *                                           each module as though it were in the
+ *                                           original file. Useful during dev.
+ * @param {Function(source)} [filter] Function to which the source of each module
+ *                                    will be passed. Must return a source string.
+ * @return {Object} An object with a key for each module by the id the source
+ *                  has been rewritten to use and two additional properties:
+ *                  __root, the id of the index or main module
+ *                  __ordered, a poset of module ids (dependency ordered), this
+ *                  isn't needed for anything at the moment, but could be handy.
+ * 
+ */
+function Bundler (options) {
     this.isReady = false;
     this.callbacks = [];
     this.bundle = null;
@@ -16,7 +40,7 @@ function Bundler (path, relativeID, root, addSourceURLComment) {
 
 mix(onReady, Bundler.prototype);
 
-Bundler.prototype.getModules = function (path, relativeID, root, addSourceURLComment) {
+Bundler.prototype.getModules = function (path, relativeID, root, addSourceURLComment, filter) {
     var ret = {modules: {}, ordered: null},
         modules = ret.modules,
         readyFn = this.ready.bind(this),
@@ -27,16 +51,14 @@ Bundler.prototype.getModules = function (path, relativeID, root, addSourceURLCom
             i = 0,
             l = ordered.length;
 
-        // I am under the impression that v8 is smart enough to optimize
-        // away an `if` in a loop body, but in this case it doesn't hurt
-        // to do it manually.
-
-        if (addComment)
-            for ( ; i < l; i++)
-                modules[ordered[i]] = this.modules[ordered[i]].source + '\n//@ sourceURL=http://localhost:1337' + this.modules[ordered[i]].identity;
-        else 
-            for ( ; i < l; i++)
+        for ( ; i < l; i++) {
+            if (filter)
+                modules[ordered[i]] = filter(this.modules[ordered[i]].source);
+            else 
                 modules[ordered[i]] = this.modules[ordered[i]].source;
+            if (addComment)
+                modules[ordered[i]] += '\n//@ sourceURL=http://localhost:1337' + this.modules[ordered[i]].identity;
+        }
 
         ret.__ordered = ordered;
         ret.__root = this.identity;

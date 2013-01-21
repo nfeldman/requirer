@@ -1,3 +1,9 @@
+/**
+ * @fileOverview The guts of a module loader to quickly prepare 
+ * nodejs style modules for various task, but especially to 
+ * serve to browsers.
+ */
+
 var fs      = require('fs'),
     __path  = require('path'),
     each    = require('../lib/each'),
@@ -5,11 +11,6 @@ var fs      = require('fs'),
     onReady = require('../lib/onReady'),
     parser  = require('acorn'),
     getRequires = require('../lib/getRequires');
-
-// The downside to the object oriented approach in the previous
-// version was that it got weird. The downside to this version
-// is that it is hard to see how to make it work as an EventEmitter.
-// But it should be fast enough that we won't care.
 
 function Mod () {
     this.source   = '';
@@ -133,5 +134,4 @@ module.exports = function (path, relativeID, root) {
 
         return cwd.join('/');
     }
-
 };
