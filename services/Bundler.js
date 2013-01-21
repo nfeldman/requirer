@@ -12,10 +12,9 @@ var sourceLoader = require('./sourceLoader'),
 
 /**
  *
- * @param {Object} options
- * @param {string} options.path Path to the root module
- * @param {string} options.relativeID Directory relative id string, e.g. '../lib/mix'
- * @param {string} options.root Portion of the system path to exclude from 
+ * @param {string} path Path to the root module
+ * @param {string} relativeID Directory relative id string, e.g. '../lib/mix'
+ * @param {string} root Portion of the system path to exclude from 
  *                              module names, e.g. /Users/nfeldman/projects
  * @param {boolean} [addSourceComment=false] Whether to include a comment that
  *                                           causes chrome's debugger to display
@@ -26,11 +25,11 @@ var sourceLoader = require('./sourceLoader'),
  * @return {Object} An object with a key for each module by the id the source
  *                  has been rewritten to use and two additional properties:
  *                  __root, the id of the index or main module
- *                  __ordered, a poset of module ids (dependency ordered), this
- *                  isn't needed for anything at the moment, but could be handy.
+ *                  __ordered, a poset (i.e. dependency ordered) of module ids,
+ *                   this isn't needed for anything at the moment.
  * 
  */
-function Bundler (options) {
+function Bundler (path, relativeID, root, addSourceURLComment, filter) {
     this.isReady = false;
     this.callbacks = [];
     this.bundle = null;
@@ -57,7 +56,7 @@ Bundler.prototype.getModules = function (path, relativeID, root, addSourceURLCom
             else 
                 modules[ordered[i]] = this.modules[ordered[i]].source;
             if (addComment)
-                modules[ordered[i]] += '\n//@ sourceURL=http://localhost:1337' + this.modules[ordered[i]].identity;
+                modules[ordered[i]] += '\n//@ sourceURL=' + this.modules[ordered[i]].identity + '.js';
         }
 
         ret.__ordered = ordered;
