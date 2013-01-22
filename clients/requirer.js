@@ -26,7 +26,7 @@
     }
 
 
-    scriptTag = document.getElementById('dev-requirer');
+    scriptTag = document.getElementById('requirer');
     // get the program's entry point from the dom
     index = scriptTag.getAttribute('data-main');
     share = scriptTag.getAttribute('data-share');
