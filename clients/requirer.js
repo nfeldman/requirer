@@ -1,8 +1,8 @@
 /**
  * @fileOverview Requirer tool for development.
- * Demonstrates how to use the output of requirer/services/Bundler from the browser
+ * Demonstrates how to use the output of requirer/components/Bundler from the browser
  *
- * to use, include this tags in your apps index page:
+ * to use, include this tag in your apps index page:
  *     <script type="text/javascript" src="path/to/requirer.js" id="dev-requirer" data-index="index" data-share="false" class="dev"></script>
  */
 
@@ -58,23 +58,21 @@
     request.send();
 
     function require (path) {
-        var module = {exports:{}},
-            fn;
+        var module = {exports:{}};
 
         if (share && shared[path])
             return shared[path];
 
         if (modules[path]) {
-            // evaluate in a clean environment and pass in the context. There
-            // are two ways we can do this that make sense.
+            // evaluate and invoke. There are two ways we can do this that make sense.
             //
             // Way 1:
-            // This is the more obvious and probably more performant, approach.
+            // This is the more obvious, safer, and probably more performant, approach.
             // It really only has 1 drawback, in that the code you view in the
             // browser will be wrapped in a function, which will make all your
             // line numbers off by 1.
-            //
-            // fn = new Function('exports, require, module, global, undefined', modules[path]);
+            // // evaluate in a clean environment
+            // var fn = new Function('exports, require, module, global, undefined', modules[path]);
             // fn(module.exports, require, module, this);
             //
             // Way 2:
