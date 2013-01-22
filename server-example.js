@@ -3,9 +3,13 @@
  * javascript file, starting from an application's entry point, which must be
  * called 'index.js' and found in the project directory. It also serves all the
  * static resources, like css files, you might need.
+ * 
  * This is too simple for anything but development, and should never be used in
  * a production environment.
+ * 
  */
+
+// REQUIRER SPECIFIC PORTION IN LINES 55 - 93
 
 var http = require('http'),
     fs   = require('fs'),  
@@ -28,7 +32,6 @@ var http = require('http'),
     },
     root = path.resolve(__dirname, '../../');
 
-// most of these will be from files that don't exist
 process.on('uncaughtException', function (err) {
     console.log('Caught exception: ' + err);
 });
@@ -59,7 +62,7 @@ http.createServer(function (request, response) {
         // 2. get the starting point
         relativeID = parseQuery(url.query).root;
 
-        if (!/^(?:\.{1,2}|\/)/.test(relativeID))
+        if (!/^(?:\.|\/)/.test(relativeID))
             relativeID = './' + relativeID;
 
 
@@ -87,7 +90,6 @@ http.createServer(function (request, response) {
         // 3. bundle the modules
         return bundler.getModules(path.join(__dirname, '../project'), relativeID, 
                     path.resolve(__dirname, '../../'), true);
-
     }
 
     console.time('serving ' + pathname);
