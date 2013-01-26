@@ -36,7 +36,7 @@ function Bundler (path, relativeID, root, addSourceURLComment, filter) {
     this.callbacks = [];
     this.bundle = null;
     if (path && relativeID && root)
-        this.getModules(path, relativeID, root, addSourceURLComment);
+        this.getModules(path, relativeID, root, addSourceURLComment, filter);
 }
 
 mix(onReady, Bundler.prototype);
