@@ -1,8 +1,10 @@
 /**
- * A class that bundles modules prepared by sourceLoader into a JSON 
- * object, optionally including the //@ sourceURL comment for better client 
- * side debugging.
+ * A utility that bundles modules prepared by sourceLoader into a simpler JS
+ * object intended to be converted to JSON and evaluated on the client. It
+ * optionally includes the //@ sourceURL comment at the end of each module's
+ * source string for better client side debugging.
  */
+
 var sourceLoader = require('./sourceLoader'),
     mix = require('../lib/mix'),
     onReady = require('../lib/onReady');
