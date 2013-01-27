@@ -1,6 +1,6 @@
 /**
- * @fileOverview The guts of a module loader to quickly prepare 
- * nodejs style modules for various task, but especially to 
+ * @fileOverview The guts of a module loader to quickly prepare
+ * nodejs style modules for various task, but especially to
  * serve to browsers.
  */
 
@@ -19,7 +19,7 @@ function Mod () {
     this.timesSeen = 0;
 }
 
-module.exports = function (path, relativeID, root) {
+module.exports = function (path, relativeID, root, aliases) {
     var deps     = Object.create(null),
         jobTotal = 0,
         jobDone  = 0,
@@ -57,6 +57,8 @@ module.exports = function (path, relativeID, root) {
         var resolvedID = !path.indexOf(root) && path.slice(rootLen, -3),
             module;
 
+        !path.indexOf(root) && path.slice(rootLen, -3);
+
         if (!resolvedID) // TODO real error handling
             throw Error('dude');
 
@@ -76,7 +78,7 @@ module.exports = function (path, relativeID, root) {
             return ++modules.modules[resolvedID].timesSeen;
 
         ++jobTotal;
-        
+
         modules.modules[resolvedID] = !isRoot ? new Mod() : parent;
         module = modules.modules[resolvedID];
         module.location = path;
@@ -118,6 +120,13 @@ module.exports = function (path, relativeID, root) {
         var segments = identifier.split('/'),
             filename = segments.pop(),
             seg;
+
+        if (segments[0] == '') {
+            alias = segments[1];
+            segments.shift(); // drop ''
+            segments.shift(); // drop alias
+            aliases[alias] && [].unshift.apply(segments, aliases[alias].split('/'));
+        }
 
         while (seg = segments.shift()) {
             if (!seg || seg == '.')

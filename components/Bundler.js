@@ -31,7 +31,7 @@ var sourceLoader = require('./sourceLoader'),
  *                   this isn't needed for anything at the moment.
  * 
  */
-function Bundler (path, relativeID, root, addSourceURLComment, filter) {
+function Bundler (path, relativeID, root, aliases, addSourceURLComment, filter) {
     this.isReady = false;
     this.callbacks = [];
     this.bundle = null;
@@ -41,17 +41,26 @@ function Bundler (path, relativeID, root, addSourceURLComment, filter) {
 
 mix(onReady, Bundler.prototype);
 
-Bundler.prototype.getModules = function (path, relativeID, root, addSourceURLComment, filter) {
+Bundler.prototype.getModules = function (path, relativeID, root, aliases, addSourceURLComment, filter) {
     var ret = {modules: {}, ordered: null},
         modules = ret.modules,
         readyFn = this.ready.bind(this),
-        addComment = !!addSourceURLComment;
+        addComment;
 
-    sourceLoader(path, relativeID, root).onReady(function () {
+    if (typeof aliases == 'boolean') {
+        filter = addSourceURLComment;
+        addSourceURLComment = aliases;
+        aliases = undefined;
+    }
+
+    addComment = !!addSourceURLComment;
+
+    sourceLoader(path, relativeID, root, aliases).onReady(function () {
         var ordered = this.getSorted(),
             i = 0,
             l = ordered.length;
 
+        // v8 should be smart enough to optimize this for us
         for ( ; i < l; i++) {
             if (filter)
                 modules[ordered[i]] = filter(this.modules[ordered[i]].source);

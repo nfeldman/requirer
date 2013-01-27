@@ -1,9 +1,9 @@
 /**
  * @fileOverview Requirer tool for development.
- * Demonstrates how to use the output of requirer/components/Bundler from the browser
+ * Demonstrates how to use the output of requirer/services/Bundler from the browser
  *
  * to use, include this tag in your apps index page:
- *     <script type="text/javascript" src="path/to/requirer.js" id="dev-requirer" data-index="index" data-share="false" class="dev"></script>
+ *     <script type="text/javascript" src="path/to/requirer.js" id="requirer" data-index="index" data-share="false"></script>
  */
 
 (function (undefined) {
@@ -25,10 +25,13 @@
             testXHR = null;
     }
 
-
     scriptTag = document.getElementById('requirer');
+
     // get the program's entry point from the dom
     index = scriptTag.getAttribute('data-main');
+    // whether to re-evaluate each module every time it is included or not
+    // slower initialization and (probably) greater memory consumption versus
+    // trusting yourself never to mutate a shared module... you decide.
     share = scriptTag.getAttribute('data-share');
     share == 'true' ? true : false;
 
@@ -64,15 +67,16 @@
             return shared[path];
 
         if (modules[path]) {
-            // evaluate and invoke. There are two ways we can do this that make sense.
+            // evaluate in a clean environment and pass in the context. There
+            // are two ways we can do this that make sense.
             //
             // Way 1:
-            // This is the more obvious, safer, and probably more performant, approach.
+            // This is the more obvious and probably more performant, approach.
             // It really only has 1 drawback, in that the code you view in the
             // browser will be wrapped in a function, which will make all your
             // line numbers off by 1.
-            // // evaluate in a clean environment
-            // var fn = new Function('exports, require, module, global, undefined', modules[path]);
+            //
+            // fn = new Function('exports, require, module, global, undefined', modules[path]);
             // fn(module.exports, require, module, this);
             //
             // Way 2:
