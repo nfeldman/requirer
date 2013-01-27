@@ -57,8 +57,6 @@ module.exports = function (path, relativeID, root, aliases) {
         var resolvedID = !path.indexOf(root) && path.slice(rootLen, -3),
             module;
 
-        !path.indexOf(root) && path.slice(rootLen, -3);
-
         if (!resolvedID) // TODO real error handling
             throw Error('dude');
 
