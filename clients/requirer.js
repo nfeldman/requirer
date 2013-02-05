@@ -61,12 +61,14 @@
     request.send();
 
     function require (path) {
-        var module = {exports:{}};
+        var module = {exports:{}},
+            fn, s;
 
         if (share && shared[path])
             return shared[path];
 
         if (modules[path]) {
+
             // evaluate in a clean environment and pass in the context. There
             // are two ways we can do this that make sense.
             //
@@ -76,7 +78,7 @@
             // browser will be wrapped in a function, which will make all your
             // line numbers off by 1.
             //
-            // fn = new Function('exports, require, module, global, undefined', modules[path]);
+            // var fn = new Function('exports, require, module, global, undefined', modules[path]);
             // fn(module.exports, require, module, this);
             //
             // Way 2:
@@ -85,7 +87,14 @@
             (function (exports, require, module, global, undefined) {
                 eval(modules[path]);
             }(module.exports, require, module, this));
-
+            // 
+            // Way 3:
+            // in production mode
+            // fn = new Function (modules[path].slice(0, modules[path].indexOf('-')), modules[path].slice(modules[path].indexOf('-') + 1));
+            // fn(module.exports, require, module, this);
+            // s = 'fn = function(' + modules[path].slice(0, modules[path].indexOf('-')) + ') {' + modules[path].slice(modules[path].indexOf('-') + 1) + '}';
+            // eval(s);
+            // fn(module.exports, require, module, this);
             if (share)
                 shared[path] = module.exports;
 

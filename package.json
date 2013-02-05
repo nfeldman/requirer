@@ -4,13 +4,17 @@
   "description": "very simple nodejs style modules module loader for client side js",
   "version": "0.2.0",
   "dependencies": {
-    "acorn": ">=0.0.1"
+    "acorn": ">=0.0.1",
+    "uglify-js": "~2.2.4"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/nfeldman/requirer.git"
   },
-  "keywords": ["require","build"],
+  "keywords": [
+    "require",
+    "build"
+  ],
   "devDependencies": {},
   "optionalDependencies": {},
   "engines": {

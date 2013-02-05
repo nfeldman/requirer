@@ -7,7 +7,8 @@
 
 var sourceLoader = require('./sourceLoader'),
     mix = require('../lib/mix'),
-    onReady = require('../lib/onReady');
+    onReady = require('../lib/onReady'),
+    uglify  = require('uglify-js');
 
 // TODO identifier shortening
 // since all of the modules are in the same place, we can rewrite their names
@@ -35,6 +36,8 @@ function Bundler (path, relativeID, root, aliases, addSourceURLComment, filter) 
     this.isReady = false;
     this.callbacks = [];
     this.bundle = null;
+    this.idmap  = Object.create(null);
+    this.commonPrefix = '';
     if (path && relativeID && root)
         this.getModules(path, relativeID, root, addSourceURLComment, filter);
 }
@@ -45,7 +48,8 @@ Bundler.prototype.getModules = function (path, relativeID, root, aliases, addSou
     var ret = {modules: {}, ordered: null},
         modules = ret.modules,
         readyFn = this.ready.bind(this),
-        addComment;
+        that = this,
+        addComment, minify;
 
     if (typeof aliases == 'boolean') {
         filter = addSourceURLComment;
@@ -55,26 +59,81 @@ Bundler.prototype.getModules = function (path, relativeID, root, aliases, addSou
 
     addComment = !!addSourceURLComment;
 
+
     sourceLoader(path, relativeID, root, aliases).onReady(function () {
         var ordered = this.getSorted(),
+            _ordered = that._minifyModuleIdentifiers(this.modules, ordered),
             i = 0,
-            l = ordered.length;
+            l = ordered.length,
+            source;
 
         // v8 should be smart enough to optimize this for us
         for ( ; i < l; i++) {
-            if (filter)
-                modules[ordered[i]] = filter(this.modules[ordered[i]].source);
-            else 
-                modules[ordered[i]] = this.modules[ordered[i]].source;
-            if (addComment)
-                modules[ordered[i]] += '\n//@ sourceURL=' + this.modules[ordered[i]].identity + '.js';
+            if (filter) {
+                modules[_ordered[i]] = filter(this.modules[ordered[i]].source);
+            } else if (addComment) {
+                modules[_ordered[i]] = this.modules[ordered[i]].source + '\n//@ sourceURL=' + this.modules[ordered[i]].identity + '.js';
+            } else {
+                console.log(ordered[i])
+                source = this.modules[ordered[i]].source.replace(/\s*console\.(?:log|warn|error|debug|info)\(.+\)[\n;]/g, '');
+                source = uglify.minify('function x(exports,require,module,global,undefined){' + source + '}', {fromString: true}).code;
+                modules[_ordered[i]] = source.slice(source.indexOf('(') + 1, source.indexOf(')')) + '-' + source.slice(source.indexOf('{') + 1, -1);
+            }
         }
 
-        ret.__ordered = ordered;
-        ret.__root = this.identity;
-        this.bundle = ret;
+        ret.__ordered = _ordered;
+        ret.__root = _ordered[this._index];
+        that.bundle = ret;
+
         readyFn(null, ret);
     });
 };
+
+Bundler.prototype._minifyModuleIdentifiers = function (modules, ordered) {
+    var alpha = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_+=~`:;\'",.<>/\\?',
+        len   = alpha.length,
+        cycle = 0,
+        idmap = this.idmap,
+        ret   = new Array(ordered.length),
+        names;
+    
+    ordered.map(function (name, i) {modules[name]._index = i; return name})
+        .sort(function (a, b) {
+            return modules[a].timesSeen != modules[b].timesSeen ? modules[a].timesSeen > modules[b].timesSeen ? 1 : -1 : 0;
+        }).forEach(function (name, i) {
+            var idx = i % len,
+                module = modules[name];
+
+            !(idx % len) && ++cycle;
+            idmap[module.identity] = repeat(alpha.charAt(idx), cycle);
+            ret[module._index] = idmap[module.identity];
+            // delete module._index;
+        });
+
+    names = RegExp('\\(\\s*[\'"](' + Object.keys(idmap).join('|').replace(/\//g, '\\/') + ')[\'"]\\s*\\)', 'g');
+
+    for (var i = 0, l = ordered.length; i < l; i++)
+        modules[ordered[i]].source = modules[ordered[i]].source.replace(names, function (a, b) {
+            return "('" + idmap[b] + "')";
+        });
+    return ret;
+};
+
+// via jdalton, original comment follows:
+// Based on work by Yaffle (@4esn0k) and Dr. J.R.Stockton.
+// Uses the `Exponentiation by squaring` algorithm.
+// http://www.merlyn.demon.co.uk/js-misc0.htm#MLS
+// https://github.com/jdalton/fusejs/blob/master/src/lang/string.js#L16-25
+
+function repeat (string, count) {
+    var half;
+    if (count < 1)
+        return '';
+    if (count % 2) 
+        return repeat(string, count - 1) + string;
+
+    half = repeat(string, count / 2);
+    return half + half;
+}
 
 module.exports = Bundler;
