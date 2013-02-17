@@ -10,9 +10,6 @@ var sourceLoader = require('./sourceLoader'),
     onReady = require('../lib/onReady'),
     uglify  = require('uglify-js');
 
-// TODO identifier shortening
-// since all of the modules are in the same place, we can rewrite their names
-
 /**
  *
  * @param {string} path Path to the root module
