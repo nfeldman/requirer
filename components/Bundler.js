@@ -27,9 +27,8 @@ var sourceLoader = require('./sourceLoader'),
  *                  __root, the id of the index or main module
  *                  __ordered, a poset (i.e. dependency ordered) of module ids,
  *                   this isn't needed for anything at the moment.
- * 
  */
-function Bundler (path, relativeID, root, aliases, addSourceURLComment, filter) {
+function Bundler (path, relativeID, root, addSourceURLComment, filter) {
     this.isReady = false;
     this.callbacks = [];
     this.bundle = null;
@@ -41,23 +40,17 @@ function Bundler (path, relativeID, root, aliases, addSourceURLComment, filter) 
 
 mix(onReady, Bundler.prototype);
 
-Bundler.prototype.getModules = function (path, relativeID, root, aliases, addSourceURLComment, filter) {
+Bundler.prototype.getModules = function (path, relativeID, root, addSourceURLComment, filter) {
     var ret = {modules: {}, ordered: null},
         modules = ret.modules,
         readyFn = this.ready.bind(this),
         that = this,
         addComment, minify;
 
-    if (typeof aliases == 'boolean') {
-        filter = addSourceURLComment;
-        addSourceURLComment = aliases;
-        aliases = undefined;
-    }
-
     addComment = !!addSourceURLComment;
 
 
-    sourceLoader(path, relativeID, root, aliases).onReady(function () {
+    sourceLoader(path, relativeID, root).onReady(function () {
         var ordered = this.getSorted(),
             _ordered = that._minifyModuleIdentifiers(this.modules, ordered),
             i = 0,

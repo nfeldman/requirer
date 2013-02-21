@@ -19,7 +19,7 @@ function Mod () {
     this.timesSeen = 0;
 }
 
-module.exports = function (path, relativeID, root, aliases) {
+module.exports = function (path, relativeID, root) {
     var deps     = Object.create(null),
         jobTotal = 0,
         jobDone  = 0,
@@ -98,7 +98,12 @@ module.exports = function (path, relativeID, root, aliases) {
 
     function loadDependencies (module, path, root) {
         // module.ast = parser.parse(module.source);
-        var ast = parser.parse(module.source);
+        try {
+            var ast = parser.parse(module.source);
+        } catch (e) {
+            console.log('parsing', path);
+            console.error(e.message, e.stack);
+        }
 
         each(getRequires(ast), function (r) {
             var cwdsegments, abspath;
@@ -118,13 +123,6 @@ module.exports = function (path, relativeID, root, aliases) {
         var segments = identifier.split('/'),
             filename = segments.pop(),
             seg;
-
-        if (segments[0] == '') {
-            alias = segments[1];
-            segments.shift(); // drop ''
-            segments.shift(); // drop alias
-            aliases[alias] && [].unshift.apply(segments, aliases[alias].split('/'));
-        }
 
         while (seg = segments.shift()) {
             if (!seg || seg == '.')
