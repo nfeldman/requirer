@@ -14,9 +14,9 @@ var sourceLoader = require('./sourceLoader'),
  *
  * @param {string} path Path to the root module
  * @param {string} relativeID Directory relative id string, e.g. '../lib/mix'
- * @param {string} root Portion of the system path to exclude from 
+ * @param {string} root Portion of the system path to exclude from
  *                              module names, e.g. /Users/nfeldman/projects
- * @param {boolean} [addSourceComment=false] Whether to include a comment that
+ * @param {boolean} [productionMode=false] Whether to include a comment that
  *                                           causes chrome's debugger to display
  *                                           each module as though it were in the
  *                                           original file. Useful during dev.
@@ -28,51 +28,55 @@ var sourceLoader = require('./sourceLoader'),
  *                  __ordered, a poset (i.e. dependency ordered) of module ids,
  *                   this isn't needed for anything at the moment.
  */
-function Bundler (path, relativeID, root, addSourceURLComment, filter) {
+function Bundler (path, relativeID, root, productionMode, known) {
     this.isReady = false;
     this.callbacks = [];
     this.bundle = null;
     this.idmap  = Object.create(null);
     this.commonPrefix = '';
     if (path && relativeID && root)
-        this.getModules(path, relativeID, root, addSourceURLComment, filter);
+        this.getModules(path, relativeID, root, productionMode, known);
 }
 
 mix(onReady, Bundler.prototype);
 
-Bundler.prototype.getModules = function (path, relativeID, root, addSourceURLComment, filter) {
-    var ret = {modules: {}, ordered: null},
+Bundler.prototype.getModules = function (path, relativeID, root, productionMode, known) {
+    var ret = {modules: {}},
         modules = ret.modules,
         readyFn = this.ready.bind(this),
         that = this,
         addComment, minify;
 
-    addComment = !!addSourceURLComment;
-
+    addComment = productionMode == 0;
+    !known && (known = {});
 
     sourceLoader(path, relativeID, root).onReady(function () {
         var ordered = this.getSorted(),
-            _ordered = that._minifyModuleIdentifiers(this.modules, ordered),
+            // _ordered = that._minifyModuleIdentifiers(this.modules, ordered),
             i = 0,
             l = ordered.length,
             source;
 
         // v8 should be smart enough to optimize this for us
         for ( ; i < l; i++) {
-            if (filter) {
-                modules[_ordered[i]] = filter(this.modules[ordered[i]].source);
-            } else if (addComment) {
-                modules[_ordered[i]] = this.modules[ordered[i]].source + '\n//@ sourceURL=' + this.modules[ordered[i]].identity + '.js';
+            if (known[ordered[i]])
+                continue;
+            if (addComment) {
+                modules[ordered[i]] = this.modules[ordered[i]].source + '\n//@ sourceURL=' + this.modules[ordered[i]].identity + '.js';
             } else {
-                console.log(ordered[i])
-                source = this.modules[ordered[i]].source.replace(/\s*console\.(?:log|warn|error|debug|info)\(.+\)[\n;]/g, '');
-                source = uglify.minify('function x(exports,require,module,global,undefined){' + source + '}', {fromString: true}).code;
-                modules[_ordered[i]] = source.slice(source.indexOf('(') + 1, source.indexOf(')')) + '-' + source.slice(source.indexOf('{') + 1, -1);
+                try {
+                source = this.modules[ordered[i]].source;
+                modules[ordered[i]] = uglify.minify('function x(exports,require,module,global,undefined){' + source + '}', {fromString: true}).code.replace(/^function x/, 'function');
+                } catch (e)  {
+                    console.log(ordered[i], e);
+                    process.exit(1);
+                }
+                // modules[ordered[i]] = source.slice(source.indexOf('(') + 1, source.indexOf(')')) + '-' + source.slice(source.indexOf('{') + 1, -1);
             }
         }
 
-        ret.__ordered = _ordered;
-        ret.__root = _ordered[this._index];
+        ret.__ordered = ordered;
+        ret.__ = this.identity;
         that.bundle = ret;
 
         readyFn(null, ret);
@@ -86,7 +90,7 @@ Bundler.prototype._minifyModuleIdentifiers = function (modules, ordered) {
         idmap = this.idmap,
         ret   = new Array(ordered.length),
         names;
-    
+
     ordered.map(function (name, i) {modules[name]._index = i; return name})
         .sort(function (a, b) {
             return modules[a].timesSeen != modules[b].timesSeen ? modules[a].timesSeen > modules[b].timesSeen ? 1 : -1 : 0;
@@ -119,7 +123,7 @@ function repeat (string, count) {
     var half;
     if (count < 1)
         return '';
-    if (count % 2) 
+    if (count % 2)
         return repeat(string, count - 1) + string;
 
     half = repeat(string, count / 2);
