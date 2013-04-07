@@ -46,7 +46,7 @@ module.exports = function (path, relativeID, root) {
                 return sorted;
             }
         };
-
+console.log('\npath:', path, '\nrelativeID:', relativeID, '\nroot:', root)
     Mod.call(modules);
     mix(onReady, modules);
 
@@ -57,8 +57,10 @@ module.exports = function (path, relativeID, root) {
         var resolvedID = !path.indexOf(root) && path.slice(rootLen, -3),
             module;
 
-        if (!resolvedID) // TODO real error handling
+        if (!resolvedID) {// TODO real error handling
+            console.log(arguments)
             throw Error('dude');
+        }
 
         !deps[resolvedID] && (deps[resolvedID] = []);
 
