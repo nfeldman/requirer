@@ -41,8 +41,8 @@ function Bundler (path, relativeID, root, productionMode, known) {
 mix(onReady, Bundler.prototype);
 
 Bundler.prototype.getModules = function (path, relativeID, root, productionMode, known) {
-    var ret = {modules: {}},
-        modules = ret.modules,
+    var ret = {},
+        modules = '{',
         readyFn = this.ready.bind(this),
         that = this,
         addComment, minify;
@@ -62,7 +62,10 @@ Bundler.prototype.getModules = function (path, relativeID, root, productionMode,
             if (known[ordered[i]])
                 continue;
             if (addComment) {
-                modules[ordered[i]] = this.modules[ordered[i]].source + '\n//@ sourceURL=' + this.modules[ordered[i]].identity + '.js';
+                modules += '"' + ordered[i] + '":function (exports,require,module,global,undefined){\n' + this.modules[ordered[i]].source + '\n//@ sourceURL=' + this.modules[ordered[i]].identity + '.js\n}';
+                // modules[ordered[i]] = 'function factory(exports,require,module,global,undefined){\n' + this.modules[ordered[i]].source + '\n//@ sourceURL=' + this.modules[ordered[i]].identity + '.js\n}';
+                if (i < l - 1)
+                modules += ','
             } else {
                 try {
                 source = this.modules[ordered[i]].source;
@@ -75,6 +78,8 @@ Bundler.prototype.getModules = function (path, relativeID, root, productionMode,
             }
         }
 
+        modules += '}';
+        ret.modules = modules;
         ret.__ordered = ordered;
         ret.__ = this.identity;
         that.bundle = ret;
